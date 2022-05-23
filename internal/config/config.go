@@ -3,27 +3,29 @@ package config
 import (
 	"context"
 	"fmt"
-	"os"
-	"strings"
 
-	"github.com/jeremywohl/flatten/v2"
 	"github.com/spf13/pflag"
-	"gopkg.in/yaml.v3"
 )
 
 type Config struct {
-	options *Options
-	binds   []*Bind
-	config  map[string]*ConfigValue
+	options   *Options
+	bindings  Bindings
+	configSet ConfigSet
 }
 
 type ConfigAdapter func(*Config)
 
+type ConfigSet map[string]*ConfigValue
+
 type Loader interface {
-	Process(dst any) error
+	Process(cs ConfigSet) error
 }
 
-type LoaderFunc func(dst any) error
+func (fn LoaderFunc) Process(cs ConfigSet) error {
+	return fn(cs)
+}
+
+type LoaderFunc func(cs ConfigSet) error
 
 type Options struct {
 	flags     *pflag.FlagSet
@@ -36,7 +38,9 @@ type ConfigValue struct {
 	origin Origin
 }
 
-type Bind struct {
+type Bindings []*Binding
+
+type Binding struct {
 	key  string
 	flag *pflag.Flag
 }
@@ -53,9 +57,9 @@ const (
 
 func New(ctx context.Context) *Config {
 	return &Config{
-		options: &Options{},
-		binds:   []*Bind{},
-		config:  make(map[string]*ConfigValue),
+		options:   &Options{},
+		bindings:  []*Binding{},
+		configSet: make(ConfigSet),
 	}
 }
 
@@ -80,7 +84,7 @@ func WithFilename(filename string) ConfigAdapter {
 func (c *Config) AllSettings() map[string]any {
 	cfg := make(map[string]any)
 
-	for k, v := range c.config {
+	for k, v := range c.configSet {
 		cfg[k] = v.value
 	}
 
@@ -90,7 +94,7 @@ func (c *Config) AllSettings() map[string]any {
 func (c *Config) AllSettingsChanged() map[string]any {
 	cfg := make(map[string]any)
 
-	for k, v := range c.config {
+	for k, v := range c.configSet {
 		if v.origin > ConfigDefault {
 			cfg[k] = v.value
 		}
@@ -108,94 +112,10 @@ func (c *Config) Load(opts ...ConfigAdapter) error {
 		return fmt.Errorf("unable to bind flags: %w", err)
 	}
 
-	if err := c.loadDefault(); err != nil {
-		return fmt.Errorf("unable to load defaults: %w", err)
-	}
-
-	if err := c.loadFile(c.options.filename); err != nil {
-		return fmt.Errorf("unable to load file: %w", err)
-	}
-
-	if err := c.loadEnv(c.options.envPrefix); err != nil {
-		return fmt.Errorf("unable to load env: %w", err)
-	}
-
-	if err := c.loadFlag(); err != nil {
-		return fmt.Errorf("unable to load flags: %w", err)
-	}
-
-	return nil
-}
-
-func (c *Config) loadDefault() error {
-	for _, v := range c.binds {
-		if v.flag.DefValue != "" {
-			if _, ok := c.config[v.key]; !ok {
-				c.config[v.key] = &ConfigValue{}
-			}
-			c.config[v.key].value = v.flag.DefValue
-			c.config[v.key].origin = ConfigDefault
-		}
-	}
-
-	return nil
-}
-
-func (c *Config) loadFile(filename string) error {
-	data, err := os.ReadFile(filename)
-	if err != nil {
-		return fmt.Errorf("unable to read file: %w", err)
-	}
-
-	var cfg map[string]any
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		return fmt.Errorf("unable to unmarshal yaml: %w", err)
-	}
-
-	cfgflat, err := flatten.Flatten(cfg, "", flatten.DotStyle)
-	if err != nil {
-		fmt.Errorf("unable to flatten config file: %w", err)
-	}
-
-	for k, v := range cfgflat {
-		if _, ok := c.config[k]; !ok {
-			c.config[k] = &ConfigValue{}
-		}
-		c.config[k].value = v
-		c.config[k].origin = ConfigFile
-	}
-
-	return nil
-}
-
-func (c *Config) loadEnv(prefix string) error {
-	for _, v := range c.binds {
-		envDotted := strings.ReplaceAll(v.key, ".", "_")
-		envUpper := strings.ToUpper(envDotted)
-		envPrefixed := fmt.Sprintf("%v_%v", prefix, envUpper)
-
-		if env, ok := os.LookupEnv(envPrefixed); ok {
-			if _, ok := c.config[v.key]; !ok {
-				c.config[v.key] = &ConfigValue{}
-			}
-			c.config[v.key].value = env
-			c.config[v.key].origin = ConfigEnv
-		}
-	}
-
-	return nil
-}
-
-func (c *Config) loadFlag() error {
-	for _, v := range c.binds {
-		if v.flag.Changed {
-			if _, ok := c.config[v.key]; !ok {
-				c.config[v.key] = &ConfigValue{}
-			}
-			c.config[v.key].value = v.flag.Value
-			c.config[v.key].origin = ConfigFlag
-		}
-	}
+	Defaults(c.bindings).Process(c.configSet)
+	File(c.options.filename).Process(c.configSet)
+	Env(c.bindings, c.options.envPrefix).Process(c.configSet)
+	Flag(c.bindings).Process(c.configSet)
 
 	return nil
 }
@@ -208,11 +128,11 @@ func (c *Config) bind() error {
 			return
 		}
 
-		b := &Bind{
+		b := &Binding{
 			key:  flag.Annotations[bindAnnotation][0],
 			flag: flag,
 		}
-		c.binds = append(c.binds, b)
+		c.bindings = append(c.bindings, b)
 	})
 
 	return nil
