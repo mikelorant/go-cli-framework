@@ -22,7 +22,7 @@ func File(filename string) Loader {
 
 		flatDecodedData, err := flatten.Flatten(decodedData, "", flatten.DotStyle)
 		if err != nil {
-			fmt.Errorf("unable to flatten config file: %w", err)
+			return fmt.Errorf("unable to flatten config file: %w", err)
 		}
 
 		for k, v := range flatDecodedData {

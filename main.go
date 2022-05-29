@@ -1,7 +1,7 @@
 package main
 
 import (
-	"go-cli-framework/cmd"
+	"github.com/mikelorant/go-cli-framework/cmd"
 )
 
 func main() {
