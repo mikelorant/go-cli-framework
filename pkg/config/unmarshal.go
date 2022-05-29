@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/mitchellh/mapstructure"
+	"github.com/nqd/flat"
 )
 
 func (c *Config) Unmarshal(out any) error {
@@ -15,17 +16,23 @@ func (c *Config) UnmarshalWithKey(key string, out any) error {
 	return UnmarshalWithKey(c.AllSettings(), key, out)
 }
 
-func Unmarshal(in any, out any) error {
-	if err := mapstructure.Decode(in, out); err != nil {
-		return fmt.Errorf("unable to decode config: %w", err)
+func Unmarshal(in map[string]any, out any) error {
+	nested, err := flat.Unflatten(in, nil)
+	if err != nil {
+		fmt.Errorf("unable to unflatten map: %w", err)
+	}
+
+	if err := mapstructure.Decode(nested, out); err != nil {
+		return fmt.Errorf("unable to decode map: %w", err)
 	}
 
 	return nil
 }
 
 func UnmarshalWithKey(in map[string]any, key string, out any) error {
-	if err := mapstructure.Decode(getKey(in, key), out); err != nil {
-		return fmt.Errorf("unable to decode config: %w", err)
+	sub := getKey(in, key)
+	if err := Unmarshal(sub, out); err != nil {
+		return fmt.Errorf("unable to unmarshal: %w", err)
 	}
 
 	return nil
