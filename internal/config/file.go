@@ -15,17 +15,17 @@ func File(filename string) Loader {
 			return fmt.Errorf("unable to read file: %w", err)
 		}
 
-		var cfg map[string]any
-		if err := yaml.Unmarshal(data, &cfg); err != nil {
+		var decodedData map[string]any
+		if err := yaml.Unmarshal(data, &decodedData); err != nil {
 			return fmt.Errorf("unable to unmarshal yaml: %w", err)
 		}
 
-		cfgflat, err := flatten.Flatten(cfg, "", flatten.DotStyle)
+		flatDecodedData, err := flatten.Flatten(decodedData, "", flatten.DotStyle)
 		if err != nil {
 			fmt.Errorf("unable to flatten config file: %w", err)
 		}
 
-		for k, v := range cfgflat {
+		for k, v := range flatDecodedData {
 			if _, ok := cs[k]; !ok {
 				cs[k] = &ConfigValue{}
 			}

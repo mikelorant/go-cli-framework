@@ -46,7 +46,9 @@ func NewSSHCmd() *cobra.Command {
 
 func RunSSH(cmd *cobra.Command) error {
 	ctx := context.Background()
-	log := logging.New(ctx)
+	log := logging.New(ctx,
+		logging.WithLevel(true),
+	)
 	cfg := config.New(ctx)
 
 	err := cfg.Load(
@@ -58,15 +60,23 @@ func RunSSH(cmd *cobra.Command) error {
 		return fmt.Errorf("unable to load config: %w", err)
 	}
 
-	log.Println("Hello from SSH Command")
+	log.SetLevel("debug")
+
+	log.Info("Hello from SSH Command")
 
 	ssh := &ssh.SSH{}
 	cfg.UnmarshalWithKey("ssh", ssh)
-	log.Print(ssh)
+	log.SetOption(
+		logging.WithField("ssh"),
+	)
+	log.Debug(ssh)
 
 	db := &database.Database{}
 	cfg.UnmarshalWithKey("database", db)
-	log.Print(db)
+	log.SetOption(
+		logging.WithField("database"),
+	)
+	log.Debug(db)
 
 	return nil
 }

@@ -8,35 +8,12 @@ import (
 )
 
 type Config struct {
-	options   *Options
 	bindings  Bindings
 	configSet ConfigSet
+	options   *Options
 }
 
 type ConfigAdapter func(*Config)
-
-type ConfigSet map[string]*ConfigValue
-
-type Loader interface {
-	Process(cs ConfigSet) error
-}
-
-func (fn LoaderFunc) Process(cs ConfigSet) error {
-	return fn(cs)
-}
-
-type LoaderFunc func(cs ConfigSet) error
-
-type Options struct {
-	flags     *pflag.FlagSet
-	envPrefix string
-	filename  string
-}
-
-type ConfigValue struct {
-	value  any
-	origin Origin
-}
 
 type Bindings []*Binding
 
@@ -45,7 +22,26 @@ type Binding struct {
 	flag *pflag.Flag
 }
 
+type ConfigSet map[string]*ConfigValue
+
+type ConfigValue struct {
+	value  any
+	origin Origin
+}
+
 type Origin int
+
+type Options struct {
+	flags     *pflag.FlagSet
+	envPrefix string
+	filename  string
+}
+
+type Loader interface {
+	Process(cs ConfigSet) error
+}
+
+type LoaderFunc func(cs ConfigSet) error
 
 const (
 	ConfigUnset Origin = iota
@@ -58,8 +54,8 @@ const (
 func New(ctx context.Context) *Config {
 	return &Config{
 		options:   &Options{},
-		bindings:  []*Binding{},
-		configSet: make(ConfigSet),
+		bindings:  Bindings{},
+		configSet: ConfigSet{},
 	}
 }
 
@@ -81,26 +77,8 @@ func WithFilename(filename string) ConfigAdapter {
 	}
 }
 
-func (c *Config) AllSettings() map[string]any {
-	cfg := make(map[string]any)
-
-	for k, v := range c.configSet {
-		cfg[k] = v.value
-	}
-
-	return cfg
-}
-
-func (c *Config) AllSettingsChanged() map[string]any {
-	cfg := make(map[string]any)
-
-	for k, v := range c.configSet {
-		if v.origin > ConfigDefault {
-			cfg[k] = v.value
-		}
-	}
-
-	return cfg
+func (fn LoaderFunc) Process(cs ConfigSet) error {
+	return fn(cs)
 }
 
 func (c *Config) Load(opts ...ConfigAdapter) error {
@@ -136,4 +114,26 @@ func (c *Config) bind() error {
 	})
 
 	return nil
+}
+
+func (c *Config) AllSettings() map[string]any {
+	cfg := make(map[string]any)
+
+	for k, v := range c.configSet {
+		cfg[k] = v.value
+	}
+
+	return cfg
+}
+
+func (c *Config) AllSettingsChanged() map[string]any {
+	cfg := make(map[string]any)
+
+	for k, v := range c.configSet {
+		if v.origin > ConfigDefault {
+			cfg[k] = v.value
+		}
+	}
+
+	return cfg
 }
