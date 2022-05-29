@@ -1,9 +1,0 @@
-{
-  "configurations": [
-    {
-      "name": "Test5 Debug",
-      "mode": "debug",
-      "cwd": "${workspaceRoot}"
-    }
-  ]
-}

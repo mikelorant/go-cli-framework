@@ -4,20 +4,20 @@ import (
 	"context"
 	"fmt"
 
-	"test5/internal/config"
-	"test5/internal/database"
-	"test5/internal/logging"
-	"test5/internal/ssh"
+	"github.com/mikelorant/go-cli-framework/internal/database"
+	"github.com/mikelorant/go-cli-framework/internal/ssh"
+	"github.com/mikelorant/go-cli-framework/pkg/config"
+	"github.com/mikelorant/go-cli-framework/pkg/logging"
 
 	"github.com/spf13/cobra"
 )
 
-func NewSSHCmd() *cobra.Command {
+func NewExampleCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "ssh",
+		Use:   "example",
 		Short: "A brief description of your application",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if err := RunSSH(cmd); err != nil {
+			if err := RunExample(cmd); err != nil {
 				return fmt.Errorf("unable to run SSH command: %w", err)
 			}
 
@@ -44,7 +44,7 @@ func NewSSHCmd() *cobra.Command {
 	return cmd
 }
 
-func RunSSH(cmd *cobra.Command) error {
+func RunExample(cmd *cobra.Command) error {
 	ctx := context.Background()
 	log := logging.New(ctx,
 		logging.WithLevel(true),
@@ -62,20 +62,14 @@ func RunSSH(cmd *cobra.Command) error {
 
 	log.SetLevel("debug")
 
-	log.Info("Hello from SSH Command")
+	log.Info("Hello from Example Command")
 
 	ssh := &ssh.SSH{}
 	cfg.UnmarshalWithKey("ssh", ssh)
-	log.SetOption(
-		logging.WithField("ssh"),
-	)
 	log.Debug(ssh)
 
 	db := &database.Database{}
 	cfg.UnmarshalWithKey("database", db)
-	log.SetOption(
-		logging.WithField("database"),
-	)
 	log.Debug(db)
 
 	return nil

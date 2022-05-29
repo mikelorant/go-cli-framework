@@ -8,22 +8,22 @@ import (
 )
 
 const (
-	_configEnvPrefix = "TEST5"
-	_configFilename  = "test5.yaml"
+	_configEnvPrefix = "EXAMPLE"
+	_configFilename  = "example.yaml"
 )
 
 func NewRootCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "test5",
+		Use:   "go-cli-framework",
 		Short: "A brief description of your application",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return nil
 		},
 	}
 
-	cmd.AddCommand(NewSSHCmd())
+	cmd.AddCommand(NewExampleCmd())
 
-	cmd.PersistentFlags().String("config", "", "config file (default is $HOME/test5.yaml)")
+	cmd.PersistentFlags().String("config", "", "config file (default is ./example.yaml)")
 	cmd.PersistentFlags().Bool("verbose", false, "enable verbose output")
 
 	cmd.PersistentFlags().SetAnnotation("config", "bindWithKey", []string{"config"})

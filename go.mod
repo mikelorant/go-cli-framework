@@ -1,4 +1,4 @@
-module test5
+module github.com/mikelorant/go-cli-framework
 
 go 1.18
 

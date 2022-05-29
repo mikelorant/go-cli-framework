@@ -1,7 +1,7 @@
 package main
 
 import (
-	"test5/cmd"
+	"go-cli-framework/cmd"
 )
 
 func main() {
