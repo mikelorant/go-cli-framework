@@ -9,7 +9,7 @@ import (
 
 const (
 	_configEnvPrefix = "TEST5"
-	_configFilename = "test5.yaml"
+	_configFilename  = "test5.yaml"
 )
 
 func NewRootCmd() *cobra.Command {
@@ -23,11 +23,11 @@ func NewRootCmd() *cobra.Command {
 
 	cmd.AddCommand(NewSSHCmd())
 
-	cmd.PersistentFlags().String("config", 	"", 	"config file (default is $HOME/test5.yaml)")
-	cmd.PersistentFlags().Bool("verbose", 	false, 	"enable verbose output")
+	cmd.PersistentFlags().String("config", "", "config file (default is $HOME/test5.yaml)")
+	cmd.PersistentFlags().Bool("verbose", false, "enable verbose output")
 
-	cmd.PersistentFlags().SetAnnotation("config", 	"bindWithKey", []string{"config"})
-	cmd.PersistentFlags().SetAnnotation("verbose", 	"bindWithKey", []string{"debug"})
+	cmd.PersistentFlags().SetAnnotation("config", "bindWithKey", []string{"config"})
+	cmd.PersistentFlags().SetAnnotation("verbose", "bindWithKey", []string{"debug"})
 
 	return cmd
 }

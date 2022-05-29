@@ -25,21 +25,21 @@ func NewSSHCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String("key", 			"id_rsa", 	"SSH key")
-	cmd.Flags().String("user", 			"root", 	"SSH user")
-	cmd.Flags().String("host", 			"", 		"SSH host")
-	cmd.Flags().String("db-user", 		"admin", 	"Database user")
-	cmd.Flags().String("db-password", 	"", 		"Database password")
-	cmd.Flags().String("db-host", 		"", 		"Database host")
-	cmd.Flags().String("db-port", 		"3306", 	"Database port")
+	cmd.Flags().String("key", "id_rsa", "SSH key")
+	cmd.Flags().String("user", "root", "SSH user")
+	cmd.Flags().String("host", "", "SSH host")
+	cmd.Flags().String("db-user", "admin", "Database user")
+	cmd.Flags().String("db-password", "", "Database password")
+	cmd.Flags().String("db-host", "", "Database host")
+	cmd.Flags().String("db-port", "3306", "Database port")
 
-	cmd.Flags().SetAnnotation("key", 			"bindWithKey", []string{"ssh.key"})
-	cmd.Flags().SetAnnotation("user", 			"bindWithKey", []string{"ssh.user"})
-	cmd.Flags().SetAnnotation("host", 			"bindWithKey", []string{"ssh.host"})
-	cmd.Flags().SetAnnotation("db-user", 		"bindWithKey", []string{"database.user"})
-	cmd.Flags().SetAnnotation("db-password", 	"bindWithKey", []string{"database.password"})
-	cmd.Flags().SetAnnotation("db-host", 		"bindWithKey", []string{"database.host"})
-	cmd.Flags().SetAnnotation("db-port", 		"bindWithKey", []string{"database.port"})
+	cmd.Flags().SetAnnotation("key", "bindWithKey", []string{"ssh.key"})
+	cmd.Flags().SetAnnotation("user", "bindWithKey", []string{"ssh.user"})
+	cmd.Flags().SetAnnotation("host", "bindWithKey", []string{"ssh.host"})
+	cmd.Flags().SetAnnotation("db-user", "bindWithKey", []string{"database.user"})
+	cmd.Flags().SetAnnotation("db-password", "bindWithKey", []string{"database.password"})
+	cmd.Flags().SetAnnotation("db-host", "bindWithKey", []string{"database.host"})
+	cmd.Flags().SetAnnotation("db-port", "bindWithKey", []string{"database.port"})
 
 	return cmd
 }
