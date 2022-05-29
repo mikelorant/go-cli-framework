@@ -25,6 +25,7 @@ func NewExampleCmd() *cobra.Command {
 		},
 	}
 
+	cmd.Flags().SortFlags = false
 	cmd.Flags().String("key", "id_rsa", "SSH key")
 	cmd.Flags().String("user", "root", "SSH user")
 	cmd.Flags().String("host", "", "SSH host")

@@ -23,6 +23,7 @@ func NewRootCmd() *cobra.Command {
 
 	cmd.AddCommand(NewExampleCmd())
 
+	cmd.PersistentFlags().SortFlags = false
 	cmd.PersistentFlags().String("config", "", "config file (default is ./example.yaml)")
 	cmd.PersistentFlags().Bool("verbose", false, "enable verbose output")
 
