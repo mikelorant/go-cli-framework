@@ -148,6 +148,7 @@ func (lw *Logger) output(lvl Level) {
 		}
 
 		stdout.Print(scanner.Text())
+		color.Unset()
 		i++
 	}
 }
